@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Download to Investor</title>
+<meta name="description" content="Independent concept by Aditya Mathur: how Trackk can turn more Gen Z downloads into active investors at day 90, with a funnel calculator, five product changes, an F&amp;O readiness gate, experiments and SQL.">
+<style>
+:root{
+  --bg:#f7f7f5; --surface:#ffffff; --ink:#1a1d23; --muted:#5b6270; --line:#e3e4e8;
+  --accent:#6d28d9; --accent-soft:#efe9fc; --good:#18794e; --good-soft:#e6f4ec;
+  --warn:#9a5b00; --warn-soft:#fbf1dd; --bad:#b42318; --bad-soft:#fdeceb;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1115; --surface:#171a21; --ink:#e8eaee; --muted:#9aa1ad; --line:#2a2f3a;
+    --accent:#b79cff; --accent-soft:#231a3a; --good:#4cc38a; --good-soft:#12291e;
+    --warn:#e0a53c; --warn-soft:#2b2210; --bad:#f07167; --bad-soft:#2d1614;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1115; --surface:#171a21; --ink:#e8eaee; --muted:#9aa1ad; --line:#2a2f3a;
+  --accent:#b79cff; --accent-soft:#231a3a; --good:#4cc38a; --good-soft:#12291e;
+  --warn:#e0a53c; --warn-soft:#2b2210; --bad:#f07167; --bad-soft:#2d1614;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;}
+.wrap{max-width:900px;margin:0 auto;padding:40px 16px 80px}
+.kicker{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+h1{font-size:clamp(28px,5vw,40px);line-height:1.15;margin:0 0 12px;letter-spacing:-.01em}
+h2{font-size:22px;margin:56px 0 12px;padding-top:8px;letter-spacing:-.005em}
+h3{font-size:17px;margin:28px 0 8px}
+p{margin:0 0 14px}
+a{color:var(--accent)}
+.lede{font-size:18px;color:var(--muted);margin-bottom:20px}
+.meta{font-size:14px;color:var(--muted);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:10px 0;margin:20px 0 28px;display:flex;flex-wrap:wrap;gap:6px 18px}
+.note{font-size:13px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.tldr{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card .label{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.card p{margin:0;font-size:15px}
+ul,ol{padding-left:22px;margin:0 0 14px}
+li{margin:4px 0}
+.tbl{width:100%;overflow-x:auto;margin:10px 0 18px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:600}
+tr:last-child td{border-bottom:none}
+.pill{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;font-weight:600;white-space:nowrap}
+.p-good{background:var(--good-soft);color:var(--good)} .p-warn{background:var(--warn-soft);color:var(--warn)} .p-bad{background:var(--bad-soft);color:var(--bad)} .p-acc{background:var(--accent-soft);color:var(--accent)}
+.flow{display:flex;flex-direction:column;gap:8px;margin:14px 0}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.num{width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:13px}
+.step p{margin:0;font-size:15px}
+.step .t{font-weight:600;margin-bottom:2px}
+pre{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.5;margin:8px 0 18px;white-space:pre}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em}
+p code, li code, td code{background:var(--accent-soft);color:var(--accent);padding:1px 5px;border-radius:5px}
+.grader{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin:16px 0}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
+select,textarea,input[type=file]{width:100%;font:inherit;font-size:14px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+textarea{min-height:130px;resize:vertical}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+button{font:inherit;font-size:14px;border:1px solid var(--accent);color:var(--accent);background:transparent;border-radius:999px;padding:6px 14px;cursor:pointer}
+button.primary{background:var(--accent);color:#fff}
+:root[data-theme="dark"] button.primary{color:#0f1115}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) button.primary{color:#0f1115}}
+button:hover{opacity:.9}
+.case-box{font-size:14px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.case-box .msg{font-size:15px;margin-bottom:8px}
+.kv{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--muted);white-space:pre-wrap;word-break:break-word}
+.checks{list-style:none;padding:0;margin:10px 0 0}
+.checks li{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.checks li:last-child{border-bottom:none}
+.verdict{font-size:15px;font-weight:700;margin-top:10px}
+.why{background:var(--accent-soft);border-radius:12px;padding:18px 20px;margin-top:40px}
+.why h2{margin-top:0}
+footer{margin-top:48px;font-size:13px;color:var(--muted)}
+.small{font-size:13px;color:var(--muted)}
+details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:10px 0}
+summary{cursor:pointer;font-weight:600}
+@media (max-width:760px){
+  .tldr{grid-template-columns:1fr}
+  .row2{grid-template-columns:1fr}
+}
+.ctrl-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px}
+.ctrl-grid label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.ctrl-grid input{width:100%;font:inherit;font-size:14px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:7px 10px}
+.step ul{margin:6px 0 0;font-size:15px}
+@media (max-width:760px){.ctrl-grid{grid-template-columns:1fr}}
+
+input[type=checkbox]{accent-color:var(--accent)}
+.levers{display:flex;flex-direction:column;gap:8px}
+.lev{display:grid;grid-template-columns:22px 1fr 80px;gap:4px 10px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:14px;color:var(--ink);margin:0}
+.lev input[type=number]{width:80px;font:inherit;font-size:14px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:4px 8px}
+.lev .small{grid-column:2 / 4}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--muted);margin:18px 0 8px}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.sw-t,.bt{background:var(--muted);opacity:.55}
+.sw-n,.bn{background:var(--accent)}
+.bars{display:flex;flex-direction:column;gap:10px}
+.brow{display:grid;grid-template-columns:200px 1fr;gap:12px;align-items:center;font-size:14px}
+.bcol{line-height:1.2}
+.bar{display:inline-block;height:12px;border-radius:0 4px 4px 0;vertical-align:middle;margin:2px 0;max-width:calc(100% - 50px)}
+.bv{font-size:13px;margin-left:6px;vertical-align:middle;color:var(--ink)}
+@media (max-width:760px){.brow{grid-template-columns:1fr;gap:2px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<p class="kicker">Independent product concept · Aditya Mathur · Oct 2026</p>
+<h1>From download to investor: getting more of Gen Z past the first trade</h1>
+<p class="lede">India adds over 3 million demat accounts a month, but fewer than 1 in 5 accounts trade even once a year. Trackk is built for 20 to 24 year olds who find investing through creators and reels. This is a plan to turn more of those downloads into people who are still investing three months later, without pushing them into options trading, where 89% of traders under 30 lose money.</p>
+
+<div class="meta">
+  <span>Built for: Product team, Trackk (Mumbai)</span>
+  <span>Inside: the facts · my own sign-up · problem statement · the metric · user types · where the funnel leaks · five changes · calculator · experiments · SQL · 90-day plan · risks</span>
+  <span><a href="#calc">Jump to the calculator</a></span>
+</div>
+
+<p class="note">Independent work. Not affiliated with Trackk; no internal data used. Every Trackk and market fact is from public reporting and is cited. All funnel numbers in the calculator are <strong>assumptions</strong>, marked and editable, to be replaced with Trackk's real data in week one. Nothing here is investment advice, and the F&amp;O and nudge ideas would need compliance sign-off.</p>
+
+<div class="tldr">
+  <div class="card"><div class="label">The tension</div><p>Trackk's users are Gen Z (about 90%, average age 20–24), they arrive through creators and colleges, and the app's store listing leads with futures and options. Fast trades look like engagement but burn young users out.</p></div>
+  <div class="card"><div class="label">The problem</div><p>Most downloads never become investors. When I signed up myself, the PAN step was smooth but bank verification was a dead end: a name mismatch on the ₹1 UPI check, no IFSC option, and no way forward. Others never add money, leave after one IPO, or lose on options and quit.</p></div>
+  <div class="card"><div class="label">The plan</div><p>Measure "active investor at day 90", find the biggest leak with real data, then fix it with five changes: no dead ends at bank verification, a ₹100 first step, an IPO bridge, a payday plan and an F&amp;O readiness gate.</p></div>
+</div>
+
+<h2>1. The facts, from public reporting</h2>
+<div class="tbl"><table>
+<thead><tr><th>Fact</th><th>Detail</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td>Who Trackk serves</td><td>About 90% of users are Gen Z, average age 20–24: college students, interns and early professionals. Most find investing through creators, communities and digital platforms.</td><td>Business Standard; Passionate in Marketing; MediaNews4U</td></tr>
+<tr><td>Product</td><td>Stocks with an AI "Trackk Score", stock comparison, single-screen F&amp;O ("Ladder"), portfolio tools, IPO verdicts, OpinionFlow sentiment. ₹0 account opening and AMC; ₹20 or less per order.</td><td>trackk.in; Google Play</td></tr>
+<tr><td>Scale and stage</td><td>100K+ Play Store downloads, rating 4.3. SEBI-registered broker on NSE and BSE since Oct 2025. FY25 revenue ₹11 lakh.</td><td>Google Play; Entrackr</td></tr>
+<tr><td>Funding</td><td>$3.7M (₹30 Cr) in May 2026 led by Lightspeed, with Info Edge Ventures and angels including Gaurav Munjal, Tanmay Bhatt and Varun Mayya. Plans: broking infrastructure, onboarding, and more products (mutual funds, gold, credit).</td><td>Entrackr; Business Standard; MediaNews4U</td></tr>
+<tr><td>Founder's view</td><td>Young Indians struggle with "stock discovery, understanding risk, and knowing whom to trust." Trust comes from "reliable product experience, meaningful personalization, and ability to support users as their financial needs evolve." (Vedant Gupte, CEO)</td><td>MediaNews4U</td></tr>
+<tr><td>Market activation</td><td>237.7M demat accounts but only ~46M NSE active clients: <strong>19.3% active</strong>, and falling slightly. Angel One's own activation: 17%. Groww leads with ~29% of active clients.</td><td>Business Today, Sep 2026</td></tr>
+<tr><td>"Active" is a low bar</td><td>NSE counts a client as active if they traded <strong>once in 12 months</strong>. Even by that measure, 4 in 5 accounts are idle.</td><td>NSE definition</td></tr>
+<tr><td>Young traders in F&amp;O</td><td>43% of individual F&amp;O traders were under 30 in FY26 (31% in FY22). <strong>89% of under-30 traders lost money.</strong> 35% of F&amp;O traders held no shares at all.</td><td>SEBI study via HDFC Sky</td></tr>
+</tbody></table></div>
+
+<h2>2. What I found signing up myself (Oct 2026)</h2>
+<p>I went through Trackk's account opening on my own phone. One person's sign-up proves nothing about size, but it does show where the flow has no way forward.</p>
+<div class="tbl"><table>
+<thead><tr><th>Step</th><th>What happened</th><th>Verdict</th></tr></thead>
+<tbody>
+<tr><td>1. PAN</td><td>Details fetched automatically from my PAN; an email confirmed the fetch and why it was made</td><td><span class="pill p-good">Smooth</span> The email is a good trust signal for a first-time investor</td></tr>
+<tr><td>2. Bank verification (₹1 UPI check)</td><td>The app asked me to pay ₹1 by UPI so it could read my bank details. My account is a joint account, so the name on it isn't exactly mine. The check failed on name mismatch, with no explanation of what to do next.</td><td><span class="pill p-bad">Dead end</span></td></tr>
+<tr><td>2b. Add bank manually</td><td>The bank list had no HSBC (also no Citibank or Bank of America), and there was <strong>no option to enter account number + IFSC</strong>. With no listed bank and no IFSC route, there was no way to continue.</td><td><span class="pill p-bad">Dead end</span></td></tr>
+<tr><td>3 and 4 (e-sign last)</td><td>Couldn't reach them because of step 2</td><td>Not tested</td></tr>
+<tr><td>The app itself</td><td>Layout and patterns will feel familiar to anyone who has used Groww</td><td><span class="pill p-warn">Mixed</span> Familiar, so easy to learn, but the reason to pick Trackk has to show up in the first session, not later</td></tr>
+</tbody></table></div>
+
+<h3>What is probably going on</h3>
+<ul>
+  <li><strong>The ₹1 check is a "reverse penny drop".</strong> The user pays ₹1 by UPI, and the app reads the account holder's name, account number and IFSC from that payment, then compares the name with PAN. It's the fastest method and needs no typing, which is why apps use it first.</li>
+  <li><strong>It fails on names that don't match exactly.</strong> Joint accounts, initials, swapped first and last names, and middle names all cause this. Many 20–24 year olds have their first account opened with, or by, a parent, so this is likely more common for Trackk's users than for an average broker. That is a hypothesis to size with failure-reason data.</li>
+  <li><strong>The real problem is the missing fallback, not the check.</strong> The standard backup is "enter account number + IFSC", then the app sends ₹1 to that account and reads the name back (a "forward penny drop"). That works for almost any bank. Without it, any mismatch or unlisted bank ends the sign-up.</li>
+  <li><strong>The bank list matters less than it looks.</strong> Bank of America has no retail banking in India, and Citibank's Indian retail accounts moved to Axis Bank in 2023, so those two are not real gaps. HSBC, Standard Chartered, DBS, and small finance and co-operative banks are, and an IFSC route covers all of them.</li>
+</ul>
+
+<h3>The fix, in order of effort</h3>
+<ol>
+  <li><strong>Add the account number + IFSC route</strong> with a forward penny drop. Usually a small build, since most verification providers offer both methods; removes the dead end for every bank.</li>
+  <li><strong>Explain every failure in plain words</strong> and say what to do next: "The name on this account is different from your PAN. If it's a joint account, add it with IFSC and upload a bank statement showing your name."</li>
+  <li><strong>Match names with a score, not exact text.</strong> High score: pass. Medium (initials, order, joint holder): pass with a document check by operations. Low: ask for another account.</li>
+  <li><strong>Joint accounts:</strong> allow them where the user is one of the holders, with proof, if compliance confirms this meets SEBI's rule that money must come from the client's own account.</li>
+  <li><strong>Log a reason code for every failed bank check</strong> (name mismatch, bank not supported, UPI failed, user quit) so the size of each problem is known, not guessed.</li>
+</ol>
+
+<h2>3. The problem statement</h2>
+<p class="card" style="margin:10px 0 16px"><strong>Of every 100 young people who download Trackk, only a handful are still investing three months later. They drop out at bank verification, never add money, leave after one IPO application, or start with options, lose, and quit. Design an onboarding and first-90-days experience that doubles the number of downloads who become active investors, measured by a stricter metric than the industry's, without raising the share of new users whose first trade is in F&amp;O.</strong></p>
+
+<h2>4. The metric: active investor at day 90</h2>
+<ul>
+  <li><strong>North star: active investor at day 90.</strong> In days 61–90 after opening an account, the user holds at least one stock or ETF for delivery (not intraday, not F&amp;O) <strong>and</strong> either made a new buy or has a running SIP. This is stricter than NSE's "one trade in 12 months" on purpose: it measures a habit, not a visit.</li>
+  <li><strong>Early signal (to decide experiments in 30 days, not 90):</strong> by day 30, a second buy in a <em>different week</em> from the first. A second week is the first sign of a habit.</li>
+  <li><strong>Read it two ways:</strong> per 100 downloads (judges the whole funnel and acquisition spend) and per 100 accounts opened (judges the product after KYC).</li>
+  <li><strong>Guardrails:</strong> share of new users whose first order is F&amp;O (must not rise); F&amp;O losses in the first 90 days for under-25s; notification opt-outs and uninstalls; complaints; brokerage revenue per active user (watched, not optimised).</li>
+</ul>
+<p class="small">Why not just "monthly active users"? Opening the app to check a reel-tip stock is not investing. And counting F&amp;O traders as "active" rewards the path most likely to end in a loss and an uninstall.</p>
+
+<h2>5. Four kinds of new user (hypotheses to size with data)</h2>
+<div class="tbl"><table>
+<thead><tr><th>Type</th><th>How they arrive</th><th>Where they drop</th><th>What would keep them</th></tr></thead>
+<tbody>
+<tr><td><strong>Reel-curious</strong></td><td>Saw a stock or idea in a creator's video. No plan, small money.</td><td>Bank verification (name mismatch, joint or parent-linked account) or account opened but never funded</td><td>Land on the exact idea they saw; bank verification that always has a next step; a ₹100 first step</td></tr>
+<tr><td><strong>IPO chaser</strong></td><td>A hot IPO everyone is talking about</td><td>Applies, isn't allotted (most retail applicants in oversubscribed IPOs aren't), money returns, never comes back</td><td>A "not allotted?" moment that turns the refund into a first holding</td></tr>
+<tr><td><strong>Stipend saver</strong></td><td>Intern or first job; "I should start investing"</td><td>Buys once, forgets</td><td>A small plan tied to payday, with a reminder they chose</td></tr>
+<tr><td><strong>Options-curious</strong></td><td>Wants quick money; heard about options from friends or creators</td><td>Loses money in the first weeks, uninstalls</td><td>An honest readiness gate and a practice mode before real F&amp;O</td></tr>
+</tbody></table></div>
+
+<h2>6. Where 100 downloads go today (assumed)</h2>
+<p>Each step below is an assumption, set to be roughly consistent with the public 19.3% activation figure once the stricter day-90 definition is applied. Trackk's own data replaces all of it in week one.</p>
+<div class="tbl"><table>
+<thead><tr><th>Step</th><th>Assumed pass rate</th><th>Why it leaks</th></tr></thead>
+<tbody>
+<tr><td>Download → sign up</td><td>65%</td><td>Came to look, not to act</td></tr>
+<tr><td>Sign up → account opened</td><td>45%</td><td>PAN is smooth. The likely break is bank verification: a name mismatch on the ₹1 UPI check or an unlisted bank, with no IFSC fallback, ends the sign-up</td></tr>
+<tr><td>Account → money added</td><td>55%</td><td>No clear first thing to buy; "how much do I even need?"</td></tr>
+<tr><td>Money → first order</td><td>85%</td><td>Choice overload</td></tr>
+<tr><td>First order → active investor at day 90</td><td>45% (investing-first) · 15% (IPO-only) · 10% (F&amp;O-first)</td><td>No habit; IPO not allotted; losses</td></tr>
+</tbody></table></div>
+
+<h2>7. Five changes</h2>
+<div class="flow">
+  <div class="step"><div class="num">1</div><div><p class="t">No dead ends at bank verification</p><p>The fix from section 2 above: an account number + IFSC fallback for every bank, plain-language failure messages, score-based name matching, a document route for joint accounts, and a reason code on every failure. Also: save progress, so a user who leaves to find their bank details comes back to the same step, with one reminder. Creator links open on the exact stock the user saw, so curiosity survives sign-up.</p></div></div>
+  <div class="step"><div class="num">2</div><div><p class="t">A ₹100 first step</p><p>The first screen after account opening answers "what do I buy with a little money?": three low-priced, diversified ETFs explained in plain words, with the Trackk Score shown beside each. The goal is a first holding the user understands, not a big first trade.</p></div></div>
+  <div class="step"><div class="num">3</div><div><p class="t">"Not allotted?" bridge</p><p>When an IPO application isn't allotted and the money is released, show a single choice: keep the money, or put a part into an index ETF or a stock in the same sector as the IPO, with the Trackk Score. IPO-led users stop being one-time visitors.</p></div></div>
+  <div class="step"><div class="num">4</div><div><p class="t">Payday plan</p><p>After the first buy, ask one question: "When does money come in?" Offer a small monthly stock or ETF SIP on that date, with a reminder the user set themselves. Habit comes from a date, not from push notifications.</p></div></div>
+  <div class="step"><div class="num">5</div><div><p class="t">F&amp;O readiness gate</p><p>F&amp;O unlocks after a short, honest check: at least three weeks with a delivery holding, a five-question risk quiz, and a practice mode with virtual money. This sits on top of SEBI's required risk disclosure. It is not a ban; it is sequencing.</p><ul><li>Cost: some brokerage in month one.</li><li>Case for it: under-30 F&amp;O traders lose money 89% of the time, a user who loses in week two rarely returns for SIPs, gold or credit, and the brand promise is "Young India's investment platform", not a trading casino.</li></ul></div></div>
+</div>
+
+<h2 id="calc">8. Calculator: where 100 downloads go</h2>
+<div class="grader">
+<p class="small">Inputs are assumptions. Change any of them, or switch changes on and off, and see how many downloads become active investors at day 90.</p>
+<h3 style="margin-top:6px">Today's funnel</h3>
+<div class="ctrl-grid">
+  <label>Download → sign up (%)<input id="c_signup" type="number" min="0" max="100"></label>
+  <label>Sign up → account opened (%)<input id="c_kyc" type="number" min="0" max="100"></label>
+  <label>Account → money added (%)<input id="c_fund" type="number" min="0" max="100"></label>
+  <label>Money → first order (%)<input id="c_first" type="number" min="0" max="100"></label>
+  <label>First orders that are F&amp;O (%)<input id="c_fno" type="number" min="0" max="100"></label>
+  <label>Investing-first users who came only for an IPO (%)<input id="c_ipo" type="number" min="0" max="100"></label>
+  <label>Investing-first: active at day 90 (%)<input id="c_rinv" type="number" min="0" max="100"></label>
+  <label>IPO-only: active at day 90 (%)<input id="c_ripo" type="number" min="0" max="100"></label>
+  <label>F&amp;O-first: active investor at day 90 (%)<input id="c_rfi" type="number" min="0" max="100"></label>
+</div>
+<h3>Changes (switch on/off, edit effect size)</h3>
+<div class="levers">
+  <label class="lev"><input type="checkbox" id="l_kyc"> <span>1. No dead ends at bank verification</span><input id="lv_kyc" type="number" min="0"><span class="small">% more sign-ups finish account opening</span></label>
+  <label class="lev"><input type="checkbox" id="l_start"> <span>2. A ₹100 first step</span><input id="lv_start" type="number" min="0"><span class="small">% more accounts get funded</span></label>
+  <label class="lev"><input type="checkbox" id="l_ipo"> <span>3. "Not allotted?" bridge</span><input id="lv_ipo" type="number" min="0" max="100"><span class="small">% of IPO-only users active at day 90</span></label>
+  <label class="lev"><input type="checkbox" id="l_pay"> <span>4. Payday plan</span><input id="lv_pay" type="number" min="0"><span class="small">% more investing-first users active at day 90</span></label>
+  <label class="lev"><input type="checkbox" id="l_gate"> <span>5. F&amp;O readiness gate</span><input id="lv_gate" type="number" min="0" max="100"><span class="small">% of first orders that are F&amp;O after the gate</span></label>
+</div>
+<div id="cOut"></div>
+</div>
+
+<h2>9. Experiments</h2>
+<ul>
+  <li><strong>Simple user-level A/B tests are fine here.</strong> Unlike food delivery or ride-hailing, one user's onboarding doesn't use up a shared resource, so treatment doesn't leak into control. Randomise within each acquisition source (creator, college, organic, paid), because the mix shifts week to week with campaigns.</li>
+  <li><strong>Decide at day 30, confirm at day 90.</strong> Use "second buy in a different week by day 30" to make the call; keep the day-90 read running to make sure the early signal didn't lie.</li>
+  <li><strong>Sample size, roughly:</strong> to detect a lift from 13% to 15% active investors per account opened (80% power, 5% significance), each arm needs about <strong>4,500 opened accounts</strong>. If that's more than a month of Trackk's sign-ups, test the biggest change first, or use the day-30 signal, which moves more.</li>
+  <li><strong>A dead end is a bug, not an experiment.</strong> Ship the IFSC fallback and clear error messages to everyone and measure before vs after. Only the name-match threshold gets an A/B test, because loosening it trades sign-ups against fraud risk and needs a number on both.</li>
+  <li><strong>Test order after that:</strong> whichever leak the real data shows is biggest. With the assumed numbers, the ₹100 first step, then the payday plan, then the gate and the IPO bridge.</li>
+  <li><strong>The gate gets its own test</strong> with brokerage revenue per user as a tracked cost, so the trade-off is a number the team decides on, not a debate.</li>
+</ul>
+
+<h2>10. SQL</h2>
+<p class="small">PostgreSQL. Table names are assumed: <code>users</code>, <code>kyc_events</code>, <code>accounts</code>, <code>fund_transfers</code>, <code>orders</code>, <code>holdings_daily</code>, <code>sips</code>, <code>ipo_applications</code>.</p>
+<details open><summary>1. Download-to-day-90 funnel by acquisition source</summary>
+<pre><code>WITH base AS (
+  SELECT u.user_id, u.acq_source, date_trunc('week', u.installed_at) AS cohort_week,
+         a.opened_at,
+         (SELECT min(f.created_at) FROM fund_transfers f WHERE f.user_id = u.user_id AND f.status = 'SUCCESS') AS first_fund_at,
+         (SELECT min(o.created_at) FROM orders o WHERE o.user_id = u.user_id AND o.status = 'EXECUTED') AS first_order_at
+  FROM users u LEFT JOIN accounts a ON a.user_id = u.user_id
+),
+active90 AS (   -- active investor in days 61-90 after account opening
+  SELECT b.user_id
+  FROM base b
+  WHERE b.opened_at IS NOT NULL
+    AND EXISTS (SELECT 1 FROM holdings_daily h
+                WHERE h.user_id = b.user_id AND h.product IN ('DELIVERY_EQ','ETF')
+                  AND h.as_of = (b.opened_at + interval '90 days')::date AND h.qty > 0)
+    AND (EXISTS (SELECT 1 FROM orders o WHERE o.user_id = b.user_id AND o.side = 'BUY'
+                   AND o.product IN ('DELIVERY_EQ','ETF') AND o.status = 'EXECUTED'
+                   AND o.created_at BETWEEN b.opened_at + interval '61 days' AND b.opened_at + interval '90 days')
+      OR EXISTS (SELECT 1 FROM sips s WHERE s.user_id = b.user_id AND s.status = 'ACTIVE'
+                   AND s.created_at &lt;= b.opened_at + interval '90 days'))
+)
+SELECT acq_source, cohort_week,
+       count(*)                                   AS downloads,
+       count(opened_at)                           AS accounts,
+       count(first_fund_at)                       AS funded,
+       count(first_order_at)                      AS first_order,
+       count(a90.user_id)                         AS active_investor_d90,
+       round(100.0 * count(a90.user_id) / count(*), 1)                 AS per_100_downloads,
+       round(100.0 * count(a90.user_id) / nullif(count(opened_at),0), 1) AS per_100_accounts
+FROM base b LEFT JOIN active90 a90 USING (user_id)
+WHERE cohort_week &lt;= now() - interval '100 days'   -- only cohorts old enough to have a day-90 read
+GROUP BY 1, 2 ORDER BY 2, 1;</code></pre></details>
+
+<details><summary>2. Where KYC stalls: last step reached, and how many come back</summary>
+<pre><code>WITH last_step AS (
+  SELECT user_id,
+         (array_agg(step ORDER BY created_at DESC))[1] AS last_step,   -- e.g. PAN, AADHAAR, BANK, SELFIE, ESIGN, DONE
+         count(DISTINCT created_at::date)              AS days_with_activity
+  FROM kyc_events GROUP BY user_id
+)
+SELECT last_step,
+       count(*)                                                   AS users,
+       round(100.0 * count(*) / sum(count(*)) OVER (), 1)         AS pct_of_starters,
+       round(100.0 * avg((days_with_activity &gt; 1)::int), 1)       AS pct_who_returned_another_day
+FROM last_step GROUP BY 1 ORDER BY users DESC;</code></pre></details>
+
+<details><summary>2b. Bank verification: how often each method fails, why, and who recovers</summary>
+<pre><code>SELECT bv.method,                                  -- 'UPI_REVERSE_PENNY', 'MANUAL_BANK_LIST', 'IFSC_FORWARD_PENNY'
+       bv.failure_reason,                          -- NULL = passed; 'NAME_MISMATCH', 'BANK_NOT_SUPPORTED', 'UPI_FAILED', 'USER_EXIT'
+       bv.bank_name,
+       count(*)                                                             AS attempts,
+       count(DISTINCT bv.user_id)                                           AS users,
+       round(100.0 * avg(bv.name_match_score), 0)                           AS avg_name_score,
+       round(100.0 * count(DISTINCT a.user_id) / count(DISTINCT bv.user_id), 1) AS pct_who_still_opened_account
+FROM bank_verifications bv
+LEFT JOIN accounts a ON a.user_id = bv.user_id
+GROUP BY 1, 2, 3
+ORDER BY users DESC
+LIMIT 50;
+-- If NAME_MISMATCH and BANK_NOT_SUPPORTED users rarely open an account, the fallback is missing, not the user's will.</code></pre></details>
+
+<details><summary>3. Opened but never funded: how long people wait, and who never does</summary>
+<pre><code>SELECT a.acq_source_bucket,
+       count(*)                                                                     AS accounts,
+       percentile_cont(0.5) WITHIN GROUP (ORDER BY extract(epoch FROM f.first_fund - a.opened_at)/3600) AS median_hours_to_fund,
+       round(100.0 * avg((f.first_fund IS NULL OR f.first_fund &gt; a.opened_at + interval '14 days')::int), 1) AS pct_not_funded_by_day_14
+FROM (SELECT a.*, u.acq_source AS acq_source_bucket FROM accounts a JOIN users u USING (user_id)) a
+LEFT JOIN LATERAL (SELECT min(created_at) AS first_fund FROM fund_transfers
+                   WHERE user_id = a.user_id AND status = 'SUCCESS') f ON true
+WHERE a.opened_at &lt;= now() - interval '15 days'
+GROUP BY 1 ORDER BY accounts DESC;</code></pre></details>
+
+<details><summary>4. Day-90 outcome by first path: investing-first, IPO-only, F&amp;O-first</summary>
+<pre><code>WITH first_path AS (
+  SELECT DISTINCT ON (o.user_id) o.user_id,
+         CASE WHEN o.product IN ('FUT','OPT') THEN 'FNO_FIRST'
+              WHEN EXISTS (SELECT 1 FROM ipo_applications i WHERE i.user_id = o.user_id
+                           AND i.applied_at &lt;= o.created_at)
+                   AND NOT EXISTS (SELECT 1 FROM ipo_applications i WHERE i.user_id = o.user_id AND i.allotted)
+                   THEN 'IPO_NOT_ALLOTTED'
+              ELSE 'INVESTING_FIRST' END AS path
+  FROM orders o WHERE o.status = 'EXECUTED'
+  ORDER BY o.user_id, o.created_at
+)
+SELECT path, count(*) AS users,
+       round(100.0 * avg((a90.user_id IS NOT NULL)::int), 1) AS pct_active_investor_d90
+FROM first_path fp LEFT JOIN active90 a90 USING (user_id)     -- active90 as defined in query 1
+GROUP BY 1 ORDER BY users DESC;</code></pre></details>
+
+<details><summary>5. Guardrail: young users whose first 30 days included F&amp;O, and their losses</summary>
+<pre><code>SELECT exp.variant,
+       count(DISTINCT u.user_id)                                                          AS new_accounts_under_25,
+       round(100.0 * count(DISTINCT o.user_id) / count(DISTINCT u.user_id), 1)          AS pct_fno_in_first_30_days,
+       round(avg(pnl.realised_fno_pnl) FILTER (WHERE o.user_id IS NOT NULL), 0)          AS avg_fno_pnl_first_90_days
+FROM users u
+JOIN accounts a  ON a.user_id = u.user_id
+JOIN experiment_assignments exp ON exp.user_id = u.user_id AND exp.experiment = 'fno_readiness_gate'
+LEFT JOIN orders o ON o.user_id = u.user_id AND o.product IN ('FUT','OPT') AND o.status = 'EXECUTED'
+                  AND o.created_at &lt; a.opened_at + interval '30 days'
+LEFT JOIN LATERAL (SELECT sum(realised_pnl) AS realised_fno_pnl FROM pnl_daily p
+                   WHERE p.user_id = u.user_id AND p.segment = 'FNO'
+                     AND p.as_of &lt; a.opened_at + interval '90 days') pnl ON true
+WHERE date_part('year', age(a.opened_at, u.date_of_birth)) &lt; 25
+GROUP BY 1;
+-- Treatment must show a lower pct_fno_in_first_30_days. If it doesn't, the gate isn't working.</code></pre></details>
+
+<h2>11. First 90 days in the role</h2>
+<div class="tbl"><table>
+<thead><tr><th>When</th><th>What</th><th>Done means</th></tr></thead>
+<tbody>
+<tr><td>Weeks 1–2</td><td>Run queries 1–4 and 2b on real data. Replace every assumption above. Ship the IFSC fallback and clear bank-failure messages. Sit in on 10 user calls: 5 who dropped at bank verification, 5 who funded and went quiet.</td><td>One page: the real funnel, the biggest leak, and what users said about it</td></tr>
+<tr><td>Weeks 3–6</td><td>Name-match threshold test, then the change for the next-biggest leak (likely the ₹100 first step) as an A/B test, randomised within acquisition source</td><td>Day-30 read on "second buy in a different week"</td></tr>
+<tr><td>Weeks 6–10</td><td>Payday plan and "not allotted?" bridge, in parallel if traffic allows</td><td>Day-30 reads; day-90 read on the first test</td></tr>
+<tr><td>Weeks 8–12</td><td>F&amp;O readiness gate, with compliance, as its own test with revenue tracked</td><td>A decision the founders sign off with the trade-off in numbers</td></tr>
+</tbody></table></div>
+
+<h2>12. Risks and what could prove this wrong</h2>
+<ul>
+  <li><strong>The funnel numbers are mine, not Trackk's, and the sign-up finding is one person.</strong> If bank failures turn out to be rare, the work starts elsewhere. The calculator exists so the order of work follows the data.</li>
+  <li><strong>The gate costs revenue.</strong> For a young broker, F&amp;O brokerage may be most of revenue. The test makes the cost visible; the founders decide.</li>
+  <li><strong>Looser name matching can let in the wrong account.</strong> Money must come only from the client's own bank account. Medium-score matches go through a document check, and fraud and payout-reversal rates are guardrails on that test.</li>
+  <li><strong>Nudges can annoy.</strong> Every reminder is one the user chose (payday date, KYC step). Watch opt-outs and uninstalls as guardrails.</li>
+  <li><strong>Suggestions must not become advice.</strong> ETF and stock suggestions are educational and broad-based, never personalised "buy this" calls. Compliance reviews every screen.</li>
+  <li><strong>Day 90 is slow.</strong> The day-30 signal could mislead. Keep the day-90 read on every test.</li>
+</ul>
+
+<div class="why">
+<h2>Why I built this</h2>
+<p>I'm 22, which puts me inside Trackk's user base, and most of my friends' first investments followed the exact paths above: a reel, an IPO, an options tip. I signed up for Trackk myself and got stuck at bank verification, which is why it leads this plan. At EnKash I owned merchant onboarding for the acquiring product, so I have seen how one missing document stalls a sign-up. For CoinDCX I mapped 12 events from sign-up to first trade and designed an A/B test for the biggest KYC drop-off. A year in fraud and AML at Stripe taught me that the guardrail is part of the product, not an afterthought. Trackk's next stage is turning downloads into investors who stay; that's the problem I want to work on.</p>
+</div>
+
+<footer>
+<p><strong>Sources</strong> (accessed Oct 2026):
+<a href="https://www.business-standard.com/amp/companies/start-ups/gen-z-investing-startup-trackk-raises-3-7-mn-from-lightspeed-info-edge-126051901485_1.html">Business Standard, May 2026</a> ·
+<a href="https://entrackr.com/news/trading-app-trackk-raises-fresh-funds-from-lightspeed-and-info-edge-ventures-11846086">Entrackr</a> ·
+<a href="https://www.passionateinmarketing.com/trackk-launches-not-your-daddys-investment-platform-brand-film-targeting-gen-z-investors/">Passionate in Marketing, Jun 2026</a> ·
+<a href="https://www.medianews4u.com/content-may-capture-attention-but-it-cannot-replace-credibility-vedant-gupte-trackk/">MediaNews4U interview with Vedant Gupte</a> ·
+<a href="https://trackk.in/">trackk.in</a> ·
+<a href="https://play.google.com/store/apps/details?id=com.we3.tradebook.app&amp;hl=en">Trackk on Google Play</a> ·
+<a href="https://www.businesstoday.in/personal-finance/story/demat-accounts-are-growing-faster-than-active-investors-what-does-it-mean-for-brokerages-554079-2026-09-09">Business Today, Sep 2026</a> ·
+<a href="https://www.business-standard.com/markets/news/groww-gains-market-share-in-july-nse-active-clients-dip-1-8-m-o-m-126081700374_1.html">Business Standard, Aug 2026</a> ·
+<a href="https://hdfcsky.com/news/derivatives-market-gets-gen-z-twist-but-losses-cast-a-long-shadow-sebi">SEBI study via HDFC Sky</a> · <a href="https://hyperverge.co/blog/reverse-penny-drop-101/">HyperVerge: how reverse penny drop works</a> · <a href="https://www.citigroup.com/global/news/press-release/2023/citi-completes-sale-of-india-consumer-banking-to-axis-bank-limited-">Citi: sale of India consumer banking to Axis Bank</a></p>
+<p>Aditya Mathur · <a href="https://adimathur-creates.github.io">adimathur-creates.github.io</a> · <a href="https://www.linkedin.com/in/adityaamathur">LinkedIn</a> · adityamathur2004@gmail.com</p>
+</footer>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+// Today's funnel: ASSUMPTIONS, editable. Replace with Trackk's real numbers.
+const C = {signup:65, kyc:45, fund:55, first:85, fno:35, ipo:25, rinv:45, ripo:15, rfi:10};
+// Levers: on/off + effect size (assumptions)
+const L = {
+  kyc:   {on:true, v:15, label:'1. No dead ends at bank verification', unit:'% more sign-ups finish account opening'},
+  start: {on:true, v:20, label:'2. A ₹100 first step', unit:'% more accounts get funded'},
+  ipo:   {on:true, v:30, label:'3. "Not allotted?" bridge', unit:'% of IPO-only starters still investing at day 90'},
+  pay:   {on:true, v:20, label:'4. Payday plan', unit:'% more investing-first users still active at day 90'},
+  gate:  {on:true, v:20, label:'5. F&O readiness gate', unit:'% of first orders that are F&O (was the input above)'}
+};
+function model(on){
+  const k = x => on && on[x];
+  const s = 100*C.signup/100;
+  const a = s*Math.min(0.98, C.kyc/100*(k('kyc') ? 1+L.kyc.v/100 : 1));
+  const f = a*Math.min(0.98, C.fund/100*(k('start') ? 1+L.start.v/100 : 1));
+  const first = f*C.first/100;
+  const fnoShare = (k('gate') ? L.gate.v : C.fno)/100;
+  const fno = first*fnoShare, inv = first*(1-fnoShare);
+  const ipoInv = inv*C.ipo/100, steadyInv = inv - ipoInv;
+  const rinv = Math.min(0.98, C.rinv/100*(k('pay') ? 1+L.pay.v/100 : 1));
+  const ripo = (k('ipo') ? L.ipo.v : C.ripo)/100;
+  const active = steadyInv*rinv + ipoInv*ripo + fno*C.rfi/100;
+  return {s, a, f, first, fno, inv, active, perAcct: a ? active/a*100 : 0};
+}
+const f1 = x => x.toFixed(1);
+function render(){
+  Object.keys(C).forEach(k=>{ const v=parseFloat($('#c_'+k).value); if(!isNaN(v) && v>=0 && v<=100) C[k]=v; });
+  Object.keys(L).forEach(k=>{ L[k].on=$('#l_'+k).checked; const v=parseFloat($('#lv_'+k).value); if(!isNaN(v) && v>=0) L[k].v=v; });
+  const onAll = {}; Object.keys(L).forEach(k=>onAll[k]=L[k].on);
+  const t = model(null), n = model(onAll);
+  const rows = [['Downloaded',100,100],['Signed up',t.s,n.s],['Account opened (KYC done)',t.a,n.a],['Added money',t.f,n.f],['Placed a first order',t.first,n.first],['<strong>Active investor at day 90</strong>',t.active,n.active]];
+  let h = '<div class="legend"><span><i class="sw sw-t"></i>Today (assumed)</span><span><i class="sw sw-n"></i>With the changes switched on</span></div>';
+  h += '<div class="bars" role="table" aria-label="Where 100 downloads go">';
+  rows.forEach(([lab,a,b])=>{
+    h += `<div class="brow" role="row"><div class="blab" role="cell">${lab}</div><div class="bcol" role="cell">
+      <div class="bar bt" style="width:${Math.max(a,0.6)}%" title="Today: ${f1(a)} of 100"></div><span class="bv">${f1(a)}</span><br>
+      <div class="bar bn" style="width:${Math.max(b,0.6)}%" title="With changes: ${f1(b)} of 100"></div><span class="bv"><strong>${f1(b)}</strong></span></div></div>`;
+  });
+  h += '</div>';
+  h += `<div class="tldr" style="margin-top:18px">
+    <div class="card"><div class="label">Active investors per 100 downloads</div><p><strong style="font-size:22px">${f1(t.active)} → ${f1(n.active)}</strong></p></div>
+    <div class="card"><div class="label">Per 100 accounts opened</div><p><strong style="font-size:22px">${f1(t.perAcct)} → ${f1(n.perAcct)}</strong><br><span class="small">Industry: 19.3 of 100 demat accounts traded even once in 12 months (Aug 2026)</span></p></div>
+    <div class="card"><div class="label">Downloads needed per active investor</div><p><strong style="font-size:22px">${Math.round(100/t.active)} → ${Math.round(100/n.active)}</strong></p></div>
+  </div>`;
+  // each lever alone
+  const solo = Object.keys(L).map(k=>{ const o={}; o[k]=true; return [L[k].label, model(o).active - t.active]; }).sort((x,y)=>y[1]-x[1]);
+  h += '<h3>Which change matters most, each switched on alone</h3><div class="tbl"><table><thead><tr><th>Change</th><th>Extra active investors per 100 downloads</th></tr></thead><tbody>';
+  solo.forEach(([l,d])=>{ h += `<tr><td>${l}</td><td>${d>=0?'+':''}${d.toFixed(2)}</td></tr>`; });
+  h += '</tbody></table></div>';
+  const notes = [];
+  notes.push(`With these inputs, Trackk needs about <strong>${Math.round(100/t.active)} downloads</strong> to produce one person who is still investing three months later. Every rupee of creator and college spend should be judged against that number, not against installs.`);
+  notes.push(`The biggest single gain comes from <strong>${solo[0][0].replace(/^\d\. /,'')}</strong>. If the real funnel data says otherwise, the order of work changes, which is the point of checking it first.`);
+  const fnoT = t.fno, fnoN = n.fno;
+  if(L.gate.on) notes.push(`F&O falls from ${C.fno}% to ${L.gate.v}% of first orders (${f1(fnoT)} → ${f1(fnoN)} per 100 downloads, even though more people now reach a first order). That costs some brokerage in month 1. The bet is that a 21-year-old who loses money on options in week 2 doesn't come back for SIPs, gold or credit later.`);
+  if(n.active < t.active) notes.push('With these inputs the changes make things worse. Check the lever sizes.');
+  h += '<ul class="small">' + notes.map(x=>'<li>'+x+'</li>').join('') + '</ul>';
+  $('#cOut').innerHTML = h;
+}
+function init(){
+  Object.keys(C).forEach(k=>{ const el=$('#c_'+k); el.value=C[k]; el.oninput=render; });
+  Object.keys(L).forEach(k=>{ $('#l_'+k).checked=L[k].on; $('#l_'+k).onchange=render; const el=$('#lv_'+k); el.value=L[k].v; el.oninput=render; });
+  render();
+}
+init();
+
+</script>
+</body>
+</html>
